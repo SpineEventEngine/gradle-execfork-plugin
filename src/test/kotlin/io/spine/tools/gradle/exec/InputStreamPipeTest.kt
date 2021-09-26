@@ -34,17 +34,25 @@ import java.io.*
 import java.util.concurrent.CountDownLatch
 
 class InputStreamPipeTest {
-    val outputStream: PipedOutputStream = PipedOutputStream()
-    val outputBuffer: BufferedWriter = outputStream.bufferedWriter()
-    val inputStream: InputStream = PipedInputStream(outputStream)
-    val pipeOutput = ByteArrayOutputStream()
-    val waitForPattern = "Server Started!"
-    val logger = InputStreamPipe(inputStream, pipeOutput, waitForPattern)
-    val latch: CountDownLatch = CountDownLatch(1)
+    private val outputStream: PipedOutputStream = PipedOutputStream()
+    private val outputBuffer: BufferedWriter = outputStream.bufferedWriter()
+    private val inputStream: InputStream = PipedInputStream(outputStream)
+    private val pipeOutput = ByteArrayOutputStream()
+    private val waitForPattern = "Server Started!"
+    private val logger = InputStreamPipe(inputStream, pipeOutput, waitForPattern)
+    private val latch: CountDownLatch = CountDownLatch(1)
 
     @Test
     fun shouldCopyInputStreamToOutputStream() {
-        shouldFindPatternFromLines("Line One", "Line Two", "Line Three", "Line Four", "Server Started!", "Line Five", "Line Six")
+        shouldFindPatternFromLines(
+            "Line One",
+            "Line Two",
+            "Line Three",
+            "Line Four",
+            "Server Started!",
+            "Line Five",
+            "Line Six"
+        )
     }
 
     @Test
@@ -54,35 +62,41 @@ class InputStreamPipeTest {
 
     @Test
     fun shouldFindInFirstLine() {
-        shouldFindPatternFromLines("Server Started!","Line Two","Line Three")
+        shouldFindPatternFromLines("Server Started!", "Line Two", "Line Three")
     }
 
     private fun shouldFindPatternFromLines(vararg lines: String) {
-        Thread({
+        Thread {
             lines.forEach { line -> writeLine(line, 100) }
             latch.countDown()
-        }).start()
+        }.start()
         logger.waitForPattern()
 
-        val outputFileContents:List<String> = splitAndRemoveExtraEmptyString()
-        val msg = "outputFileContents: ${outputFileContents.joinToString(separator = System.lineSeparator())}"
+        val outputFileContents: List<String> = splitAndRemoveExtraEmptyString()
+        val content = outputFileContents.joinToString(separator = System.lineSeparator())
+        val msg = "outputFileContents: $content"
 
         assertThat(msg, outputFileContents, `is`(allLinesUntilPattern(lines)))
 
         latch.await()
 
-        val outputFileContentsTwo:List<String> = splitAndRemoveExtraEmptyString()
-        val msgTwo = "outputFileContents: ${outputFileContents.joinToString(separator = System.lineSeparator())}"
+        val outputFileContentsTwo: List<String> = splitAndRemoveExtraEmptyString()
+        val msgTwo = "outputFileContents: $content"
         assertThat(msgTwo, outputFileContentsTwo, contains(*lines))
     }
 
     private fun allLinesUntilPattern(lines: Array<out String>): List<String> {
-        val takeWhile: MutableList<String> = lines.takeWhile { i -> i != "Server Started!" }.toMutableList()
+        val takeWhile: MutableList<String> =
+            lines.takeWhile { i -> i != "Server Started!" }
+                .toMutableList()
         takeWhile.add("Server Started!")
         return takeWhile.toList()
     }
 
-    private fun splitAndRemoveExtraEmptyString() = String(pipeOutput.toByteArray()).split(System.lineSeparator()).filter { i -> i != "" }
+    private fun splitAndRemoveExtraEmptyString() =
+        String(pipeOutput.toByteArray())
+            .split(System.lineSeparator())
+            .filter { i -> i != "" }
 
     @After
     fun cleanup() {
@@ -90,7 +104,7 @@ class InputStreamPipeTest {
         outputStream.close()
     }
 
-    private fun writeLine(output:String, postDelay:Long) {
+    private fun writeLine(output: String, postDelay: Long) {
         outputBuffer.appendLine(output)
         outputBuffer.flush()
         Thread.sleep(postDelay)
