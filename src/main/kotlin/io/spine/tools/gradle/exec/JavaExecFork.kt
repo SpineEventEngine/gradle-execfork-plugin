@@ -50,8 +50,8 @@ import javax.inject.Inject
  *
  * @see AbstractExecFork
  */
-open class JavaExecFork
-@Inject constructor(forkOptionsFactory: JavaForkOptionsFactory) : AbstractExecFork(),
+open class JavaExecFork @Inject constructor(forkOptionsFactory: JavaForkOptionsFactory) :
+    AbstractExecFork(),
     JavaForkOptions by forkOptionsFactory.newJavaForkOptions() {
 
     /** The classpath to call java with. */
