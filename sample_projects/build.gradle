@@ -1,0 +1,18 @@
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'eclipse'
+  apply plugin: 'idea'
+
+  eclipse.project.name = "gradle-javaexecfork-plugin-sample-${project.name}"
+  eclipse.classpath.downloadSources = true
+  eclipse.classpath.downloadJavadoc = true
+  eclipse.jdt.sourceCompatibility=1.8
+  eclipse.classpath.defaultOutputDir = file('build/eclipse')
+
+  ext.pluginVersion = new File(project.parent.projectDir, '../VERSION').text.trim()
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+}

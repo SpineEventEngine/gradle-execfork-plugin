@@ -1,0 +1,45 @@
+apply plugin: 'java'
+apply plugin: 'gradle-execfork-plugin'
+
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+  dependencies {
+    classpath "com.github.psxpaul:gradle-execfork-plugin:$pluginVersion"
+  }
+}
+
+task verify(dependsOn: 'startDaemon') {
+  doLast {
+    sleep(2000)
+    assert file("$buildDir/daemon.log").text.contains("PING") == true
+    assert file("$buildDir/daemon.log").text.contains("PONG") == false
+    assert file("$buildDir/daemon-error.log").text.contains("PING") == false
+    assert file("$buildDir/daemon-error.log").text.contains("PONG") == true
+  }
+}
+
+task postVerify(dependsOn: 'stopDaemon') {
+  doLast {
+    assert file("$buildDir/daemon.log").text.contains("PANG") == true
+    def previousMatches = file("$buildDir/daemon.log").text.findAll("PANG").size()
+    sleep(250)
+    assert previousMatches == file("$buildDir/daemon.log").text.findAll("PANG").size()
+  }
+}
+
+task startDaemon(type: com.github.psxpaul.task.ExecFork) {
+  if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+    executable = "$projectDir\\src\\main\\bash\\com\\github\\psxpaul\\example-win\\Main.bat"
+  } else {
+    executable = "$projectDir/src/main/bash/com/github/psxpaul/example/Main.sh"
+  }
+  workingDir = "$projectDir/src/main/bash"
+  standardOutput = "$buildDir/daemon.log"
+  errorOutput = "$buildDir/daemon-error.log"
+  stopAfter = verify
+}
+
+build.dependsOn verify, postVerify
