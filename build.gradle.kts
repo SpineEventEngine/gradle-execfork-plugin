@@ -86,9 +86,6 @@ dependencies {
     JUnit.api.forEach { testImplementation(it) }
     Truth.libs.forEach { testImplementation(it) }
 
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.hamcrest:hamcrest-all:1.3")
-
     runtimeOnly(Flogger.Runtime.systemBackend)
 }
 
