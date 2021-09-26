@@ -14,9 +14,10 @@ buildscript {
 task verify(dependsOn: 'startDaemon') {
   doLast {
     sleep(2000)
-    assert file("$buildDir/daemon.log").text.contains("VAR_ONE = $buildDir/value_one")
-    assert file("$buildDir/daemon.log").text.contains("VAR_TWO = $buildDir/value_two")
-    assert file("$buildDir/daemon.log").text.contains("VAR_THREE = /tmp/value_three")
+    final def text = file("$buildDir/daemon.log").text
+    assert text.contains("VAR_ONE = $buildDir/value_one")
+    assert text.contains("VAR_TWO = $buildDir/value_two")
+    assert text.contains("VAR_THREE = /tmp/value_three")
   }
 }
 
