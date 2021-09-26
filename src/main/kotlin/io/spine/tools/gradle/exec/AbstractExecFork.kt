@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory
 /**
  * An abstract task that will launch an executable as a background process, optionally
  * waiting until a specific port is opened. The task will also stop the process if given
- * a stopAfter or joinTask
+ * a `stopAfter` or `joinTask`.
  *
  * @see ExecFork
  * @see JavaExecFork
@@ -120,7 +120,7 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
         set(value) {
             val joinTaskVal: ExecJoin? = joinTask
             if (joinTaskVal != null) {
-                log.info("Adding '{}' as a finalizing task to '{}'", joinTaskVal.name, value?.name)
+                log.info("Adding '{}' as a finalizing task to '{}'.", joinTaskVal.name, value?.name)
                 value?.finalizedBy(joinTask)
             }
             field = value
@@ -131,7 +131,7 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
         set(value) {
             val stopAfterVal: Task? = stopAfter
             if (stopAfterVal != null) {
-                log.info("Adding {} as a finalizing task to {}", value?.name, stopAfterVal.name)
+                log.info("Adding {} as a finalizing task to {}.", value?.name, stopAfterVal.name)
                 stopAfterVal.finalizedBy(value)
             }
             field = value
@@ -139,8 +139,9 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
 
     init {
         // The exec fork task should be executed in any case if not manually specified otherwise.
-        // By default this is the case as the task has only inputs defined, but e.g. jacoco attaches a jvm argument
-        // provider, which in turn contributes an output property, which causes the task to be considered up-to-date.
+        // By default, this is the case as the task has only inputs defined, but e.g. jacoco
+        // attaches a jvm argument provider, which in turn contributes an output property,
+        // which causes the task to be considered up-to-date.
         outputs.upToDateWhen { false }
     }
 
@@ -149,8 +150,8 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
         joinTask
                 ?: throw GradleException(
                     "${javaClass.simpleName} task $name did not have" +
-                        " a joinTask associated. Make sure you have \"" +
-                            "apply plugin: 'gradle-javaexecfork-plugin'\"" +
+                        " a `joinTask` associated. Make sure you have \"" +
+                            "apply plugin: 'gradle-execfork-plugin'\"" +
                             " somewhere in your gradle file."
                 )
 
@@ -184,19 +185,30 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
     abstract fun getProcessArgs(): List<String>?
 
     private fun installPipesAndWait(process: Process) {
-        val processOut: OutputStream = if (!standardOutput.isNullOrBlank()) {
-            project.file(standardOutput!!).parentFile.mkdirs()
-            FileOutputStream(standardOutput!!)
-        } else OutputStreamLogger(project.logger)
-        val outPipe = InputStreamPipe(process.inputStream, processOut, waitForOutput)
-        if (errorOutput != null) {
-            project.file(errorOutput!!).parentFile.mkdirs()
+        val processOut: OutputStream = outputStream()
+        val outPipe = outPipe(process, processOut)
+        outPipe.waitForPattern(timeout, TimeUnit.SECONDS)
+    }
 
+    private fun outputStream() =
+        if (!standardOutput.isNullOrBlank()) {
+            val stdOut = standardOutput!!
+            project.file(stdOut).parentFile.mkdirs()
+            FileOutputStream(stdOut)
+        } else {
+            OutputStreamLogger(project.logger)
+        }
+
+    private fun outPipe(process: Process, outputStream: OutputStream): InputStreamPipe {
+        val outPipe = InputStreamPipe(process.inputStream, outputStream, waitForOutput)
+        if (errorOutput != null) {
+            val errorOut = errorOutput!!
+            project.file(errorOut).parentFile.mkdirs()
             val errPipe =
-                InputStreamPipe(process.errorStream, FileOutputStream(errorOutput!!), waitForError)
+                InputStreamPipe(process.errorStream, FileOutputStream(errorOut), waitForError)
             errPipe.waitForPattern(timeout, TimeUnit.SECONDS)
         }
-        outPipe.waitForPattern(timeout, TimeUnit.SECONDS)
+        return outPipe
     }
 
     private fun redirectStreams(processBuilder: ProcessBuilder) {
@@ -214,7 +226,7 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
                 stopDescendants()
             }
         } catch(e: Exception) {
-            log.warn("Failed to stop descendants", e)
+            log.warn("Failed to stop descendants.", e)
         }
 
         stopRootProcess()
@@ -233,7 +245,7 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
 
     private fun stopDescendants() {
         val process: Process = process ?: return
-        if(!process.isAlive) {
+        if (!process.isAlive) {
             return
         }
 
@@ -255,7 +267,7 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
         descendants.isAccessible = true
         val children: Stream<*> = descendants.call(handle) as Stream<*>
         val destroy = handle::class.memberFunctions.single {
-            it.name == if(forceKill) "destroyForcibly" else "destroy"
+            it.name == if (forceKill) "destroyForcibly" else "destroy"
         }
         destroy.isAccessible = true
 

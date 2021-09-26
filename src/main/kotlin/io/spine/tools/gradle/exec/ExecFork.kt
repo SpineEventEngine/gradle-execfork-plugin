@@ -32,7 +32,7 @@ import org.gradle.process.internal.JavaForkOptionsFactory
 
 /**
  * A task that will run a command in a separate process, optionally
- * writing stdout and stderr to disk, and waiting for a specified
+ * writing `stdout` and `stderr` to disk, and waiting for a specified
  * port to be open.
  *
  * @see AbstractExecFork
