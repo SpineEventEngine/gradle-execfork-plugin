@@ -42,9 +42,7 @@ import org.slf4j.LoggerFactory
 open class ExecJoin : DefaultTask() {
     private val log: Logger = LoggerFactory.getLogger(ExecJoin::class.java)
 
-    /**
-     * The task to call .`stop()` on
-     */
+    /** The task to call `stop()` on. */
     @Internal
     var forkTask: AbstractExecFork? = null
 
