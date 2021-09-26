@@ -26,11 +26,10 @@
 
 package io.spine.tools.gradle.exec
 
+import com.google.common.flogger.FluentLogger
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * A Gradle task that is linked to an `AbstractExecTask`, that will
@@ -40,7 +39,7 @@ import org.slf4j.LoggerFactory
  * them for any `AbstractExecTask` that has a `stopAfter` task specified.
  */
 open class ExecJoin : DefaultTask() {
-    private val log: Logger = LoggerFactory.getLogger(ExecJoin::class.java)
+    private val log: FluentLogger = FluentLogger.forEnclosingClass()
 
     /** The task to call `stop()` on. */
     @Internal
@@ -48,7 +47,10 @@ open class ExecJoin : DefaultTask() {
 
     @TaskAction
     fun exec() {
-        log.info("Stopping {} task {}", forkTask!!.javaClass.simpleName, forkTask!!.name)
+        log.atInfo().log(
+            "Stopping `%s` task `%s`.",
+            forkTask!!.javaClass.simpleName, forkTask!!.name
+        )
         forkTask!!.stop()
     }
 }

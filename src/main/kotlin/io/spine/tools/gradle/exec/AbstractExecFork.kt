@@ -26,6 +26,7 @@
 
 package io.spine.tools.gradle.exec
 
+import com.google.common.flogger.FluentLogger
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -44,8 +45,6 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.process.ProcessForkOptions
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * An abstract task that will launch an executable as a background process, optionally
@@ -57,7 +56,8 @@ import org.slf4j.LoggerFactory
  * @see ProcessForkOptions
  */
 abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
-    private val log: Logger = LoggerFactory.getLogger(javaClass.simpleName)
+
+    private val log: FluentLogger = FluentLogger.forEnclosingClass()
 
     @Input
     abstract override fun getEnvironment(): MutableMap<String, Any>
@@ -120,7 +120,10 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
         set(value) {
             val joinTaskVal: ExecJoin? = joinTask
             if (joinTaskVal != null) {
-                log.info("Adding '{}' as a finalizing task to '{}'.", joinTaskVal.name, value?.name)
+                log.atInfo().log(
+                    "Adding '%s' as a finalizing task to '%s'.",
+                    joinTaskVal.name, value?.name
+                )
                 value?.finalizedBy(joinTask)
             }
             field = value
@@ -131,7 +134,10 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
         set(value) {
             val stopAfterVal: Task? = stopAfter
             if (stopAfterVal != null) {
-                log.info("Adding {} as a finalizing task to {}.", value?.name, stopAfterVal.name)
+                log.atInfo().log(
+                    "Adding `%s` as a finalizing task to `%s`.",
+                    value?.name, stopAfterVal.name
+                )
                 stopAfterVal.finalizedBy(value)
             }
             field = value
@@ -164,7 +170,10 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
 
         environment.forEach { processBuilder.environment()[it.key] = it.value.toString() }
 
-        log.info("running process: {}", processBuilder.command().joinToString(separator = " "))
+        log.atInfo().log(
+            "Running process: `%s`.",
+            processBuilder.command().joinToString(separator = " ")
+        )
 
         this.process = processBuilder.start()
         installPipesAndWait(this.process!!)
@@ -226,7 +235,7 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
                 stopDescendants()
             }
         } catch(e: Exception) {
-            log.warn("Failed to stop descendants.", e)
+            log.atWarning().log("Failed to stop descendants.", e)
         }
 
         stopRootProcess()
@@ -251,16 +260,18 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
 
         val toHandle = process::class.memberFunctions.singleOrNull { it.name == "toHandle" }
         if (toHandle == null) {
-            log.error("Could not load Process.toHandle()." +
-                    " The killDescendants flag requires Java 9+." +
-                    " Please set killDescendants=false, or upgrade to Java 9+.")
+            log.atSevere().log("Could not load `Process.toHandle()`." +
+                    " The `killDescendants` flag requires Java 9+." +
+                    " Please set `killDescendants=false`, or upgrade to Java 9+.")
             return // not supported, pre java 9?
         }
 
         toHandle.isAccessible = true
         val handle = toHandle.call(process)
         if (handle == null) {
-            log.warn("Could not get process handle. Process descendants may not be stopped.")
+            log.atWarning().log(
+                "Could not get process handle. Process descendants may not be stopped."
+            )
             return
         }
         val descendants = handle::class.memberFunctions.single { it.name == "descendants" }
