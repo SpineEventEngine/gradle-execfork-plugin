@@ -35,7 +35,7 @@ import org.gradle.api.tasks.TaskAction
  * A Gradle task that is linked to an `AbstractExecTask`, that will
  * call `AbstractExecTask.stop()` when this task is run.
  *
- * You should * not need to create these tasks, as the `ExecForkPlugin` will create
+ * You should not need to create these tasks, as the `ExecForkPlugin` will create
  * them for any `AbstractExecTask` that has a `stopAfter` task specified.
  */
 open class ExecJoin : DefaultTask() {
