@@ -26,16 +26,15 @@
 
 package io.spine.tools.gradle.exec
 
+import com.google.common.truth.Truth.assertThat
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.hamcrest.Matchers.instanceOf
-import org.hamcrest.Matchers.sameInstance
-import org.junit.Assert.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
-class ExecForkPluginTest {
+class `'ExecForkPlugin' should` {
+
     @Test
-    fun shouldCreateStopTasks() {
+    fun `create 'stopTask'`() {
         val project: Project = ProjectBuilder.builder().build()
         project.pluginManager.apply("io.spine.execfork")
 
@@ -43,14 +42,18 @@ class ExecForkPluginTest {
         project.task(opts, "startTestTask")
 
         val startTask = project.tasks.getByName("startTestTask")
-        assertThat(startTask, instanceOf(JavaExecFork::class.java))
+        assertThat(startTask)
+            .isInstanceOf(JavaExecFork::class.java)
         val forkTask = startTask as AbstractExecFork
 
         val stopTask = project.tasks.getByName("stopTestTask")
-        assertThat(stopTask, instanceOf(ExecJoin::class.java))
+        assertThat(stopTask)
+            .isInstanceOf(ExecJoin::class.java)
 
         val joinTask = stopTask as ExecJoin
-        assertThat(joinTask.forkTask, sameInstance(forkTask))
-        assertThat(forkTask.joinTask, sameInstance(joinTask))
+        assertThat(joinTask.forkTask)
+            .isSameInstanceAs(forkTask)
+        assertThat(forkTask.joinTask)
+            .isSameInstanceAs(joinTask)
     }
 }
