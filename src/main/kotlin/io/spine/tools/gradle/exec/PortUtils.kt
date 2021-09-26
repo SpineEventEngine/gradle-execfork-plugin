@@ -78,9 +78,9 @@ fun waitForPortOpen(port: Int, timeout: Long, unit: TimeUnit, process: Process) 
 
     while (System.currentTimeMillis() < waitUntil) {
         Thread.sleep(100)
-        if (!process.isAlive) throw GradleException("Process died before port $port was opened")
+        if (!process.isAlive) throw GradleException("Process died before port $port was opened.")
         if (isPortOpen(port)) return
     }
 
-    throw GradleException("Timed out waiting for port $port to be opened")
+    throw GradleException("Timed out waiting for port $port to be opened.")
 }
