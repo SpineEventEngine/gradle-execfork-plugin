@@ -26,14 +26,17 @@
 
 package io.spine.tools.gradle.exec
 
-import org.hamcrest.Matchers.*
-import org.junit.Assert.assertThat
-import org.junit.Test
-import org.junit.After
-import java.io.*
+import com.google.common.truth.Truth.assertThat
+import java.io.BufferedWriter
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
 import java.util.concurrent.CountDownLatch
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
 
-class InputStreamPipeTest {
+class `'InputStreamPipe' should` {
     private val outputStream: PipedOutputStream = PipedOutputStream()
     private val outputBuffer: BufferedWriter = outputStream.bufferedWriter()
     private val inputStream: InputStream = PipedInputStream(outputStream)
@@ -42,8 +45,14 @@ class InputStreamPipeTest {
     private val logger = InputStreamPipe(inputStream, pipeOutput, waitForPattern)
     private val latch: CountDownLatch = CountDownLatch(1)
 
+    @AfterEach
+    fun cleanup() {
+        outputBuffer.close()
+        outputStream.close()
+    }
+
     @Test
-    fun shouldCopyInputStreamToOutputStream() {
+    fun `copy 'InputStream' to 'OutputStream'`() {
         shouldFindPatternFromLines(
             "Line One",
             "Line Two",
@@ -56,12 +65,12 @@ class InputStreamPipeTest {
     }
 
     @Test
-    fun shouldFindInLastLine() {
+    fun `find in last line`() {
         shouldFindPatternFromLines("Line One", "Line Two", "Server Started!")
     }
 
     @Test
-    fun shouldFindInFirstLine() {
+    fun `find in first line`() {
         shouldFindPatternFromLines("Server Started!", "Line Two", "Line Three")
     }
 
@@ -73,16 +82,14 @@ class InputStreamPipeTest {
         logger.waitForPattern()
 
         val outputFileContents: List<String> = splitAndRemoveExtraEmptyString()
-        val content = outputFileContents.joinToString(separator = System.lineSeparator())
-        val msg = "outputFileContents: $content"
-
-        assertThat(msg, outputFileContents, `is`(allLinesUntilPattern(lines)))
+        assertThat(outputFileContents)
+            .isEqualTo(allLinesUntilPattern(lines))
 
         latch.await()
 
         val outputFileContentsTwo: List<String> = splitAndRemoveExtraEmptyString()
-        val msgTwo = "outputFileContents: $content"
-        assertThat(msgTwo, outputFileContentsTwo, contains(*lines))
+        assertThat(outputFileContentsTwo)
+            .containsExactlyElementsIn(lines)
     }
 
     private fun allLinesUntilPattern(lines: Array<out String>): List<String> {
@@ -97,12 +104,6 @@ class InputStreamPipeTest {
         String(pipeOutput.toByteArray())
             .split(System.lineSeparator())
             .filter { i -> i != "" }
-
-    @After
-    fun cleanup() {
-        outputBuffer.close()
-        outputStream.close()
-    }
 
     private fun writeLine(output: String, postDelay: Long) {
         outputBuffer.appendLine(output)
