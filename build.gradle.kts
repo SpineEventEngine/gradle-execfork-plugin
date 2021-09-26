@@ -34,8 +34,8 @@ dependencies {
 }
 
 pluginBundle {
-    website = "http://github.com/psxpaul"
-    vcsUrl = "https://github.com/psxpaul/gradle-execfork-plugin"
+    website = "http://spine.io"
+    vcsUrl = "https://github.com/SpineEventEngine/gradle-execfork-plugin"
     description = "Execute Java or shell processes in the background during a build"
     tags = listOf("java", "exec", "background", "process")
 
