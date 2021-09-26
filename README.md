@@ -1,12 +1,11 @@
 # gradle-execfork-plugin
 
-Gradle plugin for running background processes during a build. 
-Both standard executables and java classes are supported.
+A Gradle plugin for running background processes during a build. 
+Both standard executables and Java classes are supported.
 
 Based and inspired by [`psxpaul/gradle-execfork-plugin`][original-work].
 
-## Usage
-For running a standard executable:
+## Running an executable
 
 ```groovy
 plugins {
@@ -26,7 +25,7 @@ task startDaemon(type: io.spine.gradle.task.ExecFork) {
 }
 ```
 
-For running a Java main class:
+## Running a Java class
 
 ```groovy
 plugins {
@@ -48,8 +47,9 @@ task startDaemon(type: io.spine.gradle.task.JavaExecFork) {
 }
 ```
 
-### Supported Properties
-#### ExecFork:
+## Supported Properties
+
+### `ExecFork`:
 
 Name | Type | Description
 --- | --- | ---
@@ -67,7 +67,7 @@ Name | Type | Description
 `killDescendants` | `Boolean` | *Optional.* Requires Java 9+. Kill all descendents of the started process. Default: `true`.
 
 
-#### JavaExecFork:
+### `JavaExecFork`:
 
 Name | Type | Description
 --- | --- | ---
