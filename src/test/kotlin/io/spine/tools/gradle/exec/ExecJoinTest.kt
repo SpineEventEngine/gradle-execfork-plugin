@@ -26,14 +26,23 @@
 
 package io.spine.tools.gradle.exec
 
+import com.google.common.truth.Truth.assertThat
+import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.hamcrest.Matchers.equalTo
-import org.junit.Assert.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-class ExecJoinTest {
+class `'ExecJoin' should` {
+
+    private var project: Project? = null
+
+    @BeforeEach
+    fun createProject() {
+        project = ProjectBuilder.builder().build()
+    }
+
     @Test
-    fun testCreateNameFor() {
+    fun `provide a name for the matching stop task`() {
         assertName("startJohnnie", "stopJohnnie")
         assertName("johnnie_start", "johnnie_stop")
         assertName("johnnieStart", "johnnieStop")
@@ -58,9 +67,10 @@ class ExecJoinTest {
         assertName("joseph", "joseph_stop")
     }
 
-    fun assertName(given:String, expected:String) {
-        val project = ProjectBuilder.builder().build()
-        val startTask = project.tasks.create(given, JavaExecFork::class.java)
-        assertThat(createNameFor(startTask), equalTo(expected))
+    private fun assertName(given:String, expected:String) {
+        val startTask = project!!.tasks.create(given, JavaExecFork::class.java)
+        val createdName = createNameFor(startTask)
+        assertThat(createdName)
+            .isEqualTo(expected)
     }
 }
