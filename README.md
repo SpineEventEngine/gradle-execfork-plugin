@@ -1,16 +1,19 @@
 # gradle-execfork-plugin
 
-Gradle plugin for running background processes during a build. Both standard executables and java classes are supported.
+Gradle plugin for running background processes during a build. 
+Both standard executables and java classes are supported.
+
+Based and inspired by [`psxpaul/gradle-execfork-plugin`][original-work].
 
 ## Usage
 For running a standard executable:
 
 ```groovy
 plugins {
-  id 'com.github.psxpaul.execfork' version '0.1.13'
+  id 'io.spine.execfork' version '0.1.16'
 }
 
-task startDaemon(type: com.github.psxpaul.task.ExecFork) {
+task startDaemon(type: io.spine.gradle.task.ExecFork) {
     executable = './MainScript.sh'
     args = [ '-d', '/foo/bar/data', '-v', '-l', '3' ]
     workingDir = "$projectDir/src/main/bash"
@@ -27,10 +30,10 @@ For running a java main class:
 
 ```groovy
 plugins {
-  id 'com.github.psxpaul.execfork' version '0.1.13'
+  id 'io.spine.execfork' version '0.1.13'
 }
 
-task startDaemon(type: com.github.psxpaul.task.JavaExecFork) {
+task startDaemon(type: io.spine.gradle.task.JavaExecFork) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'com.sample.application.MainApp'
     args = [ '-d', '/foo/bar/data', '-v', '-l', '3' ]
@@ -87,7 +90,6 @@ killDescendants | Boolean | *Optional.* Kill all descendents of the started proc
 
 Gradle Version | ExecFork version
 --- | ---
-< 4.10 | 0.1.8
-4.10 - 5.2.x | 0.1.9
-5.3.0 - 5.5.x | 0.1.11+
-5.6.0+ | 0.1.12+
+7.2 | 0.1.16
+
+[original-work]: https://github.com/psxpaul/gradle-execfork-plugin

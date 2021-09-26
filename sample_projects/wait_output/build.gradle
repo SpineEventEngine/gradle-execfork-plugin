@@ -7,7 +7,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "com.github.psxpaul:gradle-execfork-plugin:$pluginVersion"
+    classpath "io.spine.tools:gradle-execfork-plugin:$pluginVersion"
   }
 }
 
@@ -24,9 +24,9 @@ task integrationTest(dependsOn: 'startDaemon') {
 }
 build.dependsOn integrationTest
 
-task startDaemon(type: com.github.psxpaul.task.JavaExecFork, dependsOn: 'classes') {
+task startDaemon(type: io.spine.tools.gradle.exec.JavaExecFork, dependsOn: 'classes') {
   classpath = sourceSets.main.runtimeClasspath
-  main = 'com.github.psxpaul.example.Main'
+  main = 'io.spine.tools.example.Main'
   standardOutput = "${buildDir}/daemon.out"
   waitForOutput = 'Daemon is up!'
 }

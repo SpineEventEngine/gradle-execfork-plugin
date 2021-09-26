@@ -7,34 +7,34 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "com.github.psxpaul:gradle-execfork-plugin:$pluginVersion"
+    classpath "io.spine.tools:gradle-execfork-plugin:$pluginVersion"
   }
 }
 
 task verify(dependsOn: 'startDaemon') {
   doLast {
     sleep(2000)
-    assert file("$buildDir/daemon.log").text.contains("PING") == true
-    assert file("$buildDir/daemon.log").text.contains("PONG") == false
-    assert file("$buildDir/daemon-error.log").text.contains("PING") == false
-    assert file("$buildDir/daemon-error.log").text.contains("PONG") == true
+    assert file("$buildDir/daemon.log").text.contains("PING")
+    assert !file("$buildDir/daemon.log").text.contains("PONG")
+    assert !file("$buildDir/daemon-error.log").text.contains("PING")
+    assert file("$buildDir/daemon-error.log").text.contains("PONG")
   }
 }
 
 task postVerify(dependsOn: 'stopDaemon') {
   doLast {
-    assert file("$buildDir/daemon.log").text.contains("PANG") == true
-    def previousMatches = file("$buildDir/daemon.log").text.findAll("PANG").size()
+    assert file("$buildDir/daemon.log").text.contains("PANG")
+    final def previousMatches = file("$buildDir/daemon.log").text.findAll("PANG").size()
     sleep(250)
     assert previousMatches == file("$buildDir/daemon.log").text.findAll("PANG").size()
   }
 }
 
-task startDaemon(type: com.github.psxpaul.task.ExecFork) {
+task startDaemon(type: io.spine.tools.gradle.exec.ExecFork) {
   if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-    executable = "$projectDir\\src\\main\\bash\\com\\github\\psxpaul\\example-win\\Main.bat"
+    executable = "$projectDir\\src\\main\\bash\\example-win\\Main.bat"
   } else {
-    executable = "$projectDir/src/main/bash/com/github/psxpaul/example/Main.sh"
+    executable = "$projectDir/src/main/bash/example/Main.sh"
   }
   workingDir = "$projectDir/src/main/bash"
   standardOutput = "$buildDir/daemon.log"

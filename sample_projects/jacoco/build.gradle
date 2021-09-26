@@ -8,20 +8,20 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "com.github.psxpaul:gradle-execfork-plugin:$pluginVersion"
+    classpath "io.spine.tools:gradle-execfork-plugin:$pluginVersion"
   }
 }
 
 task workerTask(dependsOn: 'startDaemon') {
   doLast {
     sleep(1000)
-    assert file("$buildDir/daemon.log").text.contains("PING") == true
+    assert file("$buildDir/daemon.log").text.contains("PING")
   }
 }
 
-task startDaemon(type: com.github.psxpaul.task.JavaExecFork, dependsOn: 'classes') {
+task startDaemon(type: io.spine.tools.gradle.exec.JavaExecFork, dependsOn: 'classes') {
   classpath = sourceSets.main.runtimeClasspath
-  main = 'com.github.psxpaul.example.Main'
+  main = 'io.spine.tools.example.Main'
   standardOutput = "$buildDir/daemon.log"
   waitForOutput = 'PING'
   stopAfter = workerTask

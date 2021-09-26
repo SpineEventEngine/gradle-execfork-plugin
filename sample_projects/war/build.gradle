@@ -8,7 +8,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "com.github.psxpaul:gradle-execfork-plugin:$pluginVersion"
+    classpath "io.spine.tools:gradle-execfork-plugin:$pluginVersion"
   }
 }
 
@@ -23,7 +23,7 @@ dependencies {
   testImplementation 'org.apache.httpcomponents:fluent-hc:4.5.2'
 }
 
-task startDaemon(type: com.github.psxpaul.task.JavaExecFork, dependsOn: war) {
+task startDaemon(type: io.spine.tools.gradle.exec.JavaExecFork, dependsOn: war) {
   classpath = configurations.jetty
   main = 'org.eclipse.jetty.runner.Runner'
   args = [ '--port', '9201', war.archivePath.absolutePath ]

@@ -4,13 +4,13 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "com.github.psxpaul:gradle-execfork-plugin:$pluginVersion"
+    classpath "io.spine.tools:gradle-execfork-plugin:$pluginVersion"
   }
 }
 
-apply plugin: com.github.psxpaul.ExecForkPlugin
+apply plugin: io.spine.tools.gradle.exec.ExecForkPlugin
 
-task startDaemon(type: com.github.psxpaul.task.JavaExecFork, dependsOn: 'classes') {
+task startDaemon(type: io.spine.tools.gradle.exec.JavaExecFork, dependsOn: 'classes') {
   classpath = sourceSets.main.runtimeClasspath
   main = 'com.github.psxpaul.example.Main'
 }

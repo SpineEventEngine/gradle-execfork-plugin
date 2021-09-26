@@ -9,19 +9,25 @@ allprojects {
 
 plugins {
     id("com.gradle.plugin-publish").version("0.14.0")
-    id("org.jetbrains.kotlin.jvm").version("1.4.32")
+    id("org.jetbrains.kotlin.jvm").version("1.5.30")
     id("idea")
     id("maven-publish")
     id("java-gradle-plugin")
 }
 
-group = "com.github.psxpaul"
+group = "io.spine.tools"
 version = File(rootDir, "VERSION").readText().trim()
+
+java {
+    toolchain {
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
 
 dependencies {
     implementation(gradleApi())
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.4.32")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.30")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.30")
 
     testImplementation("junit:junit:4.12")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
@@ -35,7 +41,7 @@ pluginBundle {
 
     (plugins) {
         create("execForkPlugin") {
-            id = "com.github.psxpaul.execfork"
+            id = "io.spine.execfork"
             displayName = "Gradle Exec Fork Plugin"
         }
     }
