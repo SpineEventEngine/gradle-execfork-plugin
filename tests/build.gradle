@@ -3,7 +3,7 @@ subprojects {
   apply plugin: 'eclipse'
   apply plugin: 'idea'
 
-  eclipse.project.name = "gradle-javaexecfork-plugin-sample-${project.name}"
+  eclipse.project.name = "gradle-execfork-plugin-test-${project.name}"
   eclipse.classpath.downloadSources = true
   eclipse.classpath.downloadJavadoc = true
   eclipse.jdt.sourceCompatibility=1.8
