@@ -26,6 +26,7 @@
 
 package io.spine.tools.gradle.exec
 
+import com.google.common.truth.Truth.assertThat
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.ConnectException
@@ -33,85 +34,100 @@ import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit.MINUTES
+import java.util.concurrent.TimeUnit.SECONDS
 import org.gradle.api.GradleException
-import org.hamcrest.Matchers.containsString
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.greaterThanOrEqualTo
-import org.hamcrest.Matchers.instanceOf
-import org.hamcrest.Matchers.lessThanOrEqualTo
-import org.junit.Assert.assertThat
-import org.junit.Assert.fail
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 
-class PortUtilsTest {
+class `'PortUtils' should` {
+
+    var port: Int = 0
+
+    @BeforeEach
+    fun findPort() {
+        port = findOpenPort()
+    }
+
     @Test
-    fun testFindOpenPort() {
-        val port = findOpenPort()
-        assertThat(port, greaterThanOrEqualTo(1024))
-        assertThat(port, lessThanOrEqualTo(65535))
+    fun `find open port`() {
+        assertThat(port).isIn(IntRange(1024, 65535))
 
         try {
-            Socket(InetAddress.getLoopbackAddress(), port).use { fail("Socket should not have been in use already!") }
-        } catch (e: ConnectException) {
-            assertThat(e.message, containsString("Connection refused"))
-        }
-    }
-
-    @Test(timeout=2000)
-    fun testWaitForPortOpen_timeout() {
-        val stubProcess:Process = StubProcess()
-        val port = findOpenPort()
-
-        try {
-            waitForPortOpen(port, 1, TimeUnit.SECONDS, stubProcess)
-        } catch (e:Exception) {
-            assertThat(e, instanceOf(GradleException::class.java))
-            assertThat(e.message, equalTo("Timed out waiting for port $port to be opened."))
-        }
-    }
-
-    @Test(timeout=2000)
-    fun testWaitForPortOpen_processDied() {
-        val stubProcess:Process = StubProcess(false)
-        val port = findOpenPort()
-
-        try {
-            waitForPortOpen(port, 1, TimeUnit.MINUTES, stubProcess)
-        } catch (e:Exception) {
-            assertThat(e, instanceOf(GradleException::class.java))
-            assertThat(e.message, equalTo("Process died before port $port was opened."))
-        }
-    }
-
-    @Test(timeout=2000)
-    fun testWaitForPortOpen_success() {
-        val stubProcess: Process = StubProcess()
-        val port = findOpenPort()
-        val latch = CountDownLatch(1)
-
-        Thread({
-            ServerSocket(port, 1, InetAddress.getLoopbackAddress()).use {
-                it.accept()
-                latch.countDown()
+            Socket(InetAddress.getLoopbackAddress(), port).use {
+                fail("Socket should not have been in use already!")
             }
-        }).start()
-
-        waitForPortOpen(port, 1, TimeUnit.MINUTES, stubProcess)
-        latch.await(1, TimeUnit.SECONDS)
-        assertThat(latch.count, equalTo(0L))
+        } catch (e: ConnectException) {
+            assertThat(e.message).contains("Connection refused")
+        }
     }
 
-    class StubProcess(val alive:Boolean = true) : Process() {
-        override fun destroy() {}
-        override fun exitValue(): Int { return 0 }
-        override fun getOutputStream(): OutputStream? { return null }
-        override fun getErrorStream(): InputStream? { return null }
-        override fun getInputStream(): InputStream? { return null }
-        override fun waitFor(): Int { return 0 }
+    @Nested
+    inner class `wait for open port` {
 
-        override fun isAlive():Boolean {
-            return alive
+        private var stubProcess: Process? = null
+
+        @BeforeEach
+        fun createProcess() {
+            stubProcess = StubProcess()
         }
+
+        @Test
+        @Timeout(value = 2000, unit = MILLISECONDS)
+        fun `failing on timeout`() {
+            val exception = assertThrows<GradleException> {
+                waitForPortOpen(port, 1, SECONDS, stubProcess!!)
+            }
+            assertThat(exception)
+                .hasMessageThat()
+                .isEqualTo("Timed out waiting for port $port to be opened.")
+        }
+
+        @Test
+        @Timeout(value = 2000, unit = MILLISECONDS)
+        fun `failing when process died`() {
+            stubProcess = StubProcess(false)
+            val port = findOpenPort()
+
+            val exception = assertThrows<GradleException> {
+                waitForPortOpen(port, 1, MINUTES, stubProcess!!)
+            }
+            assertThat(exception)
+                .hasMessageThat()
+                .isEqualTo("Process died before port $port was opened.")
+        }
+
+        @Test
+        @Timeout(value = 2000, unit = MILLISECONDS)
+        fun successfully() {
+            val latch = CountDownLatch(1)
+
+            Thread {
+                ServerSocket(port, 1, InetAddress.getLoopbackAddress()).use {
+                    it.accept()
+                    latch.countDown()
+                }
+            }.start()
+
+            waitForPortOpen(port, 1, MINUTES, stubProcess!!)
+            latch.await(1, SECONDS)
+            assertThat(latch.count)
+                .isEqualTo(0L)
+        }
+    }
+
+    class StubProcess(private val alive: Boolean = true) : Process() {
+        override fun destroy() {}
+        override fun exitValue(): Int = 0
+        override fun getOutputStream(): OutputStream? = null
+        override fun getErrorStream(): InputStream? = null
+        override fun getInputStream(): InputStream? = null
+        override fun waitFor(): Int = 0
+        override fun isAlive(): Boolean = alive
     }
 }

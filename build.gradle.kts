@@ -94,6 +94,12 @@ dependencies {
 
 configurations.forceVersions()
 
+tasks.test {
+    useJUnitPlatform {
+        includeEngines("junit-jupiter")
+    }
+}
+
 pluginBundle {
     website = "http://spine.io"
     vcsUrl = "https://github.com/SpineEventEngine/gradle-execfork-plugin"
