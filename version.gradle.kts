@@ -24,9 +24,5 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-project.extra.apply {
-    this["versionToPublish"] = "0.0.1"
-    this["spineCoreVersion"] = "1.7.0"
-    this["spineBaseVersion"] = "1.7.0"
-    this["spineTimeVersion"] = "1.7.0"
-}
+val version = File(rootDir, "VERSION").readText().trim()
+val versionToPublish by extra(version)
