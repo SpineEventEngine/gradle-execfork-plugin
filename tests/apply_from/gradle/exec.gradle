@@ -12,5 +12,5 @@ apply plugin: io.spine.tools.gradle.exec.ExecForkPlugin
 
 task startDaemon(type: io.spine.tools.gradle.exec.JavaExecFork, dependsOn: 'classes') {
   classpath = sourceSets.main.runtimeClasspath
-  main = 'com.github.psxpaul.example.Main'
+  main = 'io.spine.tools.example.Main'
 }

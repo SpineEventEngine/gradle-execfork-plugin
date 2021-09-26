@@ -49,7 +49,7 @@ pluginBundle {
 
 tasks {
     val sampleProjects by creating(GradleBuild::class) {
-        buildFile = File("${project.rootDir}/sample_projects/build.gradle")
+        buildFile = File("${project.rootDir}/tests/build.gradle")
         tasks = listOf("clean", "build")
     }
     sampleProjects.dependsOn("publishToMavenLocal")

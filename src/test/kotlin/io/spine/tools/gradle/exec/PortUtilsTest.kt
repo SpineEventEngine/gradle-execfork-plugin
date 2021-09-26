@@ -67,7 +67,7 @@ class PortUtilsTest {
             waitForPortOpen(port, 1, TimeUnit.SECONDS, stubProcess)
         } catch (e:Exception) {
             assertThat(e, instanceOf(GradleException::class.java))
-            assertThat(e.message, equalTo("Timed out waiting for port $port to be opened"))
+            assertThat(e.message, equalTo("Timed out waiting for port $port to be opened."))
         }
     }
 
@@ -80,7 +80,7 @@ class PortUtilsTest {
             waitForPortOpen(port, 1, TimeUnit.MINUTES, stubProcess)
         } catch (e:Exception) {
             assertThat(e, instanceOf(GradleException::class.java))
-            assertThat(e.message, equalTo("Process died before port $port was opened"))
+            assertThat(e.message, equalTo("Process died before port $port was opened."))
         }
     }
 
