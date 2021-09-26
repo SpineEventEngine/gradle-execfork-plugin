@@ -26,7 +26,14 @@
 
 @file:Suppress("RemoveRedundantQualifierName") // Cannot use imports in some places.
 
+import io.spine.internal.dependency.CheckerFramework
+import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.Flogger
+import io.spine.internal.dependency.Guava
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.JavaX
 import io.spine.internal.dependency.Kotlin
+import io.spine.internal.dependency.Truth
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.forceVersions
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
@@ -67,8 +74,22 @@ dependencies {
     implementation(kotlin("stdlib-jdk8", Kotlin.version))
     implementation(Kotlin.reflect)
 
+    api(Flogger.lib)
+    api(Guava.lib)
+    api(CheckerFramework.annotations)
+    api(JavaX.annotations)
+    ErrorProne.annotations.forEach { api(it) }
+
+    testImplementation(Guava.testLib)
+    testImplementation(JUnit.runner)
+    testImplementation(JUnit.pioneer)
+    JUnit.api.forEach { testImplementation(it) }
+    Truth.libs.forEach { testImplementation(it) }
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
+
+    runtimeOnly(Flogger.Runtime.systemBackend)
 }
 
 configurations.forceVersions()
