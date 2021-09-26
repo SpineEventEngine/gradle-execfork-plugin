@@ -151,7 +151,7 @@ abstract class AbstractExecFork : DefaultTask(), ProcessForkOptions {
                 ?: throw GradleException(
                     "${javaClass.simpleName} task $name did not have" +
                         " a `joinTask` associated. Make sure you have \"" +
-                            "apply plugin: 'gradle-execfork-plugin'\"" +
+                            "apply plugin: 'io.spine.execfork'\"" +
                             " somewhere in your gradle file."
                 )
 

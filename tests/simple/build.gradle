@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'gradle-execfork-plugin'
+apply plugin: 'io.spine.execfork'
 
 buildscript {
   repositories {

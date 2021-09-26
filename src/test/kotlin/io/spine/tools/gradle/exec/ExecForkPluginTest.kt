@@ -37,7 +37,7 @@ class ExecForkPluginTest {
     @Test
     fun shouldCreateStopTasks() {
         val project: Project = ProjectBuilder.builder().build()
-        project.pluginManager.apply("gradle-execfork-plugin")
+        project.pluginManager.apply("io.spine.execfork")
 
         val opts = hashMapOf("type" to JavaExecFork::class.java)
         project.task(opts, "startTestTask")

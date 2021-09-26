@@ -44,7 +44,7 @@ import java.util.*
  *
  * Note: it is important to apply this plugin to your project for your ExecFork and JavaExecFork tasks to
  * work. E.g.:
- *          apply plugin: 'gradle-execfork-plugin'
+ *          apply plugin: 'io.spine.execfork'
  */
 class ExecForkPlugin : Plugin<Project> {
     val log: Logger = LoggerFactory.getLogger(ExecForkPlugin::class.java)
