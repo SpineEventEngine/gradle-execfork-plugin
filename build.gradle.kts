@@ -140,9 +140,9 @@ tasks {
         tasks = listOf("clean", "build")
     }
     integrationTests.dependsOn("publishToMavenLocal")
-    "test" { finalizedBy(integrationTests) }
     named<Test>("test") {
         testLogging.exceptionFormat = TestExceptionFormat.FULL
+        finalizedBy(integrationTests)
     }
 }
 
