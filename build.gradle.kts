@@ -36,6 +36,7 @@ import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Truth
 import io.spine.internal.gradle.IncrementGuard
 import io.spine.internal.gradle.PublishingRepos
+import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.spinePublishing
@@ -55,8 +56,14 @@ plugins {
     `java-gradle-plugin`
     kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
     idea
+    jacoco
+    `force-jacoco`
 }
 apply<IncrementGuard>()
+
+apply {
+    from(Scripts.jacoco(project))
+}
 
 apply(from = "$rootDir/version.gradle.kts")
 
