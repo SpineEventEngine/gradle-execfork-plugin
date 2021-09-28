@@ -24,6 +24,7 @@ task startDaemon(type: io.spine.tools.gradle.exec.JavaExecFork, dependsOn: 'clas
   main = 'io.spine.tools.gradle.example.Main'
   standardOutput = "$buildDir/daemon.log"
   stopAfter = verify
+  killDescendants = false // Set to `true` after migrating to Java 11.
 }
 
 build.dependsOn verify

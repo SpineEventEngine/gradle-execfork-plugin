@@ -78,7 +78,7 @@ class `'PortUtils' should` {
         }
 
         @Test
-        @Timeout(value = 2000, unit = MILLISECONDS)
+        @Timeout(value = 5, unit = SECONDS) // Allow longer timeout for Windows
         fun `failing on timeout`() {
             val exception = assertThrows<GradleException> {
                 waitForPortOpen(port, 1, SECONDS, stubProcess!!)
@@ -92,7 +92,6 @@ class `'PortUtils' should` {
         @Timeout(value = 2000, unit = MILLISECONDS)
         fun `failing when process died`() {
             stubProcess = StubProcess(false)
-            val port = findOpenPort()
 
             val exception = assertThrows<GradleException> {
                 waitForPortOpen(port, 1, MINUTES, stubProcess!!)

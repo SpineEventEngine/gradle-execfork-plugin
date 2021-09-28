@@ -25,6 +25,7 @@ task startDaemon(type: io.spine.tools.gradle.exec.JavaExecFork, dependsOn: 'clas
   standardOutput = "$buildDir/daemon.log"
   waitForOutput = 'PING'
   stopAfter = workerTask
+  killDescendants = false // Set to `true` after migrating to Java 11.
   jacoco.applyTo(it)
 }
 
@@ -32,8 +33,8 @@ task daemonCodeCoverageReport(type: JacocoReport) {
   executionData startDaemon.jacoco.destinationFile
   classDirectories.setFrom(sourceSets.main.runtimeClasspath)
   sourceSets sourceSets.main
-  reports.xml.enabled = true
-  reports.html.enabled = false
+  reports.xml.required.set(true)
+  reports.html.required.set(false)
 }
 daemonCodeCoverageReport.mustRunAfter stopDaemon
 workerTask.finalizedBy daemonCodeCoverageReport

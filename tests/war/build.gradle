@@ -30,6 +30,7 @@ task startDaemon(type: io.spine.tools.gradle.exec.JavaExecFork, dependsOn: war) 
   waitForPort = 9201
   timeout = 90
   stopAfter = test
+  killDescendants = false // Set to `true` after migrating to Java 11.
 }
 
 test.dependsOn startDaemon
