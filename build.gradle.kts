@@ -34,51 +34,63 @@ import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.JavaX
 import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Truth
+import io.spine.internal.gradle.IncrementGuard
+import io.spine.internal.gradle.PublishingRepos
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.forceVersions
+import io.spine.internal.gradle.spinePublishing
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
     io.spine.internal.gradle.doApplyStandard(repositories)
     io.spine.internal.gradle.doForceVersions(configurations)
 }
-repositories {
-    mavenCentral()
-}
 
 repositories.applyStandard()
 
 plugins {
     id("com.gradle.plugin-publish").version("0.16.0")
+    `java-gradle-plugin`
     kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
     idea
-    id("maven-publish")
-    id("java-gradle-plugin")
-    `force-jacoco`
 }
+apply<IncrementGuard>()
 
 apply(from = "$rootDir/version.gradle.kts")
 
 group = "io.spine.tools"
 version = extra["versionToPublish"]!!
 
-java {
-    toolchain {
-        targetCompatibility = JavaVersion.VERSION_1_8
+spinePublishing {
+    with(PublishingRepos) {
+        targetRepositories.addAll(
+            gitHub("gradle-execfork-plugin"),
+            cloudArtifactRegistry
+        )
     }
+    spinePrefix.set(false)
+    publish(project)
 }
 
+val javaVersion = JavaVersion.VERSION_1_8
+
+java {
+    toolchain {
+        targetCompatibility = javaVersion
+    }
+}
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib-jdk8", Kotlin.version))
     implementation(Kotlin.reflect)
 
-    api(Flogger.lib)
-    api(Guava.lib)
-    api(CheckerFramework.annotations)
-    api(JavaX.annotations)
-    ErrorProne.annotations.forEach { api(it) }
+    implementation(Flogger.lib)
+    implementation(Guava.lib)
+    implementation(CheckerFramework.annotations)
+    implementation(JavaX.annotations)
+    ErrorProne.annotations.forEach { implementation(it) }
 
     testImplementation(Guava.testLib)
     testImplementation(JUnit.runner)
@@ -90,6 +102,13 @@ dependencies {
 }
 
 configurations.forceVersions()
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = javaVersion.toString()
+        freeCompilerArgs = listOf("-Xskip-prerelease-check")
+    }
+}
 
 tasks.test {
     useJUnitPlatform {
@@ -112,28 +131,13 @@ pluginBundle {
 }
 
 tasks {
-    val sampleProjects by creating(GradleBuild::class) {
+    val integrationTests by creating(GradleBuild::class) {
         dir = File("${project.rootDir}/tests")
         tasks = listOf("clean", "build")
     }
-    sampleProjects.dependsOn("publishToMavenLocal")
-    "test" { finalizedBy(sampleProjects) }
+    integrationTests.dependsOn("publishToMavenLocal")
+    "test" { finalizedBy(integrationTests) }
     named<Test>("test") {
         testLogging.exceptionFormat = TestExceptionFormat.FULL
     }
-}
-
-val javadocJar by tasks.creating(Jar::class) {
-    archiveClassifier.set("javadoc")
-    from("javadoc")
-}
-
-val sourcesJar by tasks.creating(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets["main"].allSource)
-}
-
-artifacts {
-    add("archives", javadocJar)
-    add("archives", sourcesJar)
 }
