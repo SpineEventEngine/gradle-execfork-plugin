@@ -61,10 +61,6 @@ plugins {
 }
 apply<IncrementGuard>()
 
-apply {
-    from(Scripts.jacoco(project))
-}
-
 apply(from = "$rootDir/version.gradle.kts")
 
 group = "io.spine.tools"
@@ -146,5 +142,17 @@ tasks {
     "test" { finalizedBy(integrationTests) }
     named<Test>("test") {
         testLogging.exceptionFormat = TestExceptionFormat.FULL
+    }
+}
+
+apply {
+    with(Scripts) {
+        // Aggregated coverage report across all subprojects.
+        from(jacoco(project))
+        // Generate a repository-wide report of 3rd-party dependencies and their licenses.
+        from(repoLicenseReport(project))
+        // Generate a `pom.xml` file containing first-level dependency of all projects
+        // in the repository.
+        from(generatePom(project))
     }
 }
