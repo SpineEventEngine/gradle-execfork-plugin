@@ -106,8 +106,11 @@ class `'InputStreamPipe' should` {
             .filter { i -> i != "" }
 
     private fun writeLine(output: String, postDelay: Long) {
-        outputBuffer.appendLine(output)
-        outputBuffer.flush()
+        with(outputBuffer) {
+            append(output)
+            append(System.lineSeparator())
+            flush()
+        }
         Thread.sleep(postDelay)
     }
 }
