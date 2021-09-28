@@ -92,8 +92,8 @@ dependencies {
     implementation(Flogger.lib)
     implementation(Guava.lib)
     implementation(CheckerFramework.annotations)
-    implementation(JavaX.annotations)
-    ErrorProne.annotations.forEach { implementation(it) }
+    compileOnly(JavaX.annotations)
+    ErrorProne.annotations.forEach { compileOnly(it) }
 
     testImplementation(Guava.testLib)
     testImplementation(JUnit.runner)
